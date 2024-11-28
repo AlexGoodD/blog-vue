@@ -3,10 +3,16 @@
     <h1>Registro</h1>
     <form @submit.prevent="registerUser">
       <label for="email">Correo</label>
-      <input id="email" v-model="email" type="email" required />
+      <input id="email" v-model="email" type="email" placeholder="Ingresa tu correo" required />
 
       <label for="password">Contraseña</label>
-      <input id="password" v-model="password" type="password" required />
+      <input
+        id="password"
+        v-model="password"
+        type="password"
+        placeholder="Ingresa tu contraseña"
+        required
+      />
 
       <button type="submit">Registrar</button>
     </form>
@@ -14,6 +20,8 @@
 </template>
 
 <script>
+import { register } from '../services/authService'
+
 export default {
   data() {
     return {
@@ -24,20 +32,16 @@ export default {
   methods: {
     async registerUser() {
       try {
-        // Lógica para registrar al usuario
-        console.log(`Registrando usuario con email: ${this.email}`)
+        console.log(`Intentando registrar usuario: ${this.email}`)
+        await register(this.email, this.password)
+        alert('Registro exitoso')
+        console.log(`Usuario registrado: ${this.email}`)
       } catch (error) {
-        console.error('Error al registrar usuario:', error)
+        console.error('Código del error:', error.code)
+        console.error('Mensaje del error:', error.message)
+        alert('Error al registrar: ' + error.message)
       }
     },
   },
 }
 </script>
-
-<style scoped>
-/* Estilos específicos de la página de registro */
-.register-page {
-  max-width: 400px;
-  margin: auto;
-}
-</style>

@@ -2,14 +2,10 @@
 
 <template>
   <div>
-    <h1>¡Bienvenido al Blog!</h1>
-    <p>Explora las publicaciones más recientes aquí.</p>
+    <h1>Encuentra Un Blog A Tu Medida</h1>
+    <p>
+      Hay nuevos blogs todos los días, encuentra alguno de tu interés filtrando por categoría o
+      busca un tema en específico.
+    </p>
   </div>
 </template>
-
-<style scoped>
-h1 {
-  color: #007bff;
-  text-align: center;
-}
-</style>
