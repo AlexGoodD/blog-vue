@@ -20,8 +20,9 @@
 </template>
 
 <script>
-import { uploadImage } from '../services/imageService'
-import { db } from '../services/firebase'
+import { db, auth } from '../services/firebase'
+import { collection, addDoc, doc, getDoc } from 'firebase/firestore'
+import { uploadImage } from '../services/imageService.js'
 
 export default {
   data() {
@@ -30,6 +31,7 @@ export default {
       content: '',
       bannerFile: null,
       thumbnailFile: null,
+      authorName: '',
     }
   },
   methods: {
@@ -39,16 +41,50 @@ export default {
     handleThumbnailUpload(event) {
       this.thumbnailFile = event.target.files[0]
     },
-    async createPost() {
-      try {
-        const bannerUrl = await uploadImage(this.bannerFile)
-        const thumbnailUrl = await uploadImage(this.thumbnailFile)
+    async fetchAuthorName() {
+      if (!auth.currentUser) return null
 
-        await db.collection('posts').add({
+      try {
+        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid))
+        if (userDoc.exists()) {
+          const userData = userDoc.data()
+          return `${userData.firstName} ${userData.lastName.split(' ')[0]}`
+        } else {
+          throw new Error('El usuario no tiene datos registrados.')
+        }
+      } catch (error) {
+        console.error('Error al obtener el nombre del autor:', error)
+        throw error
+      }
+    },
+    async createPost() {
+      if (!auth.currentUser) {
+        alert('Debes iniciar sesión para crear un post.')
+        return
+      }
+
+      if (!this.title.trim() || !this.content.trim()) {
+        alert('Por favor completa todos los campos.')
+        return
+      }
+
+      try {
+        // Obtener el nombre del autor
+        const authorName = await this.fetchAuthorName()
+
+        // Subir imágenes a Imgbb
+        const bannerUrl = this.bannerFile ? await uploadImage(this.bannerFile) : null
+        const thumbnailUrl = this.thumbnailFile ? await uploadImage(this.thumbnailFile) : null
+
+        // Agregar el documento a la colección
+        const blogPostCollection = collection(db, 'blogPost')
+        await addDoc(blogPostCollection, {
           title: this.title,
           content: this.content,
           bannerUrl,
           thumbnailUrl,
+          author: authorName,
+          userId: auth.currentUser.uid,
           createdAt: new Date(),
         })
 
@@ -56,18 +92,9 @@ export default {
         this.$router.push('/')
       } catch (error) {
         console.error('Error al crear el post:', error)
+        alert('Hubo un error al crear el post. Intenta nuevamente.')
       }
     },
   },
 }
 </script>
-
-<style scoped>
-.create-post {
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-</style>

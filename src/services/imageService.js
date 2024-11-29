@@ -1,16 +1,25 @@
 import axios from 'axios'
 
-const IMGUR_CLIENT_ID = 'TU_CLIENT_ID'
+const IMGBB_API_KEY = 'be10365c6256d231b847a90787b0ee5a'
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const uploadImage = async (file) => {
   const formData = new FormData()
   formData.append('image', file)
 
-  const response = await axios.post('https://api.imgur.com/3/image', formData, {
-    headers: {
-      Authorization: `Client-ID ${IMGUR_CLIENT_ID}`,
-    },
-  })
+  try {
+    await delay(5000)
+    const response = await axios.post(
+      `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+      formData,
+    )
 
-  return response.data.data.link // Retorna la URL de la imagen
+    return response.data.data.url
+  } catch (error) {
+    if (error.response && error.response.status === 429) {
+      console.warn('Demasiadas solicitudes. Reintenta más tarde.')
+    }
+    throw error
+  }
 }
