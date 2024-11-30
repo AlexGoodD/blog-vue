@@ -6,6 +6,7 @@ import CreatePost from '../pages/CreatePost.vue'
 import LoginPage from '../pages/LoginPage.vue'
 import RegisterPage from '../pages/RegisterPage.vue'
 import { auth } from '../services/firebase'
+import { onAuthStateChanged } from 'firebase/auth'
 
 const routes = [
   { path: '/', name: 'Home', component: HomePage },
@@ -21,13 +22,28 @@ const router = createRouter({
   routes,
 })
 
+// Variable para controlar la inicialización del estado de autenticación
+let isAuthChecked = false
+
 // Middleware para proteger rutas
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!auth.currentUser
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: 'Login' })
+  if (!isAuthChecked) {
+    onAuthStateChanged(auth, (user) => {
+      isAuthChecked = true // Marcar que ya se verificó el estado de autenticación
+      const isAuthenticated = !!user
+      if (to.meta.requiresAuth && !isAuthenticated) {
+        next({ name: 'Login' })
+      } else {
+        next()
+      }
+    })
   } else {
-    next()
+    const isAuthenticated = !!auth.currentUser
+    if (to.meta.requiresAuth && !isAuthenticated) {
+      next({ name: 'Login' })
+    } else {
+      next()
+    }
   }
 })
 
