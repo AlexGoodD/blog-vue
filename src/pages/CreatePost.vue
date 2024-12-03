@@ -1,14 +1,11 @@
 <template>
   <div class="create-post">
     <div class="steps">
-      <div class="step-indicators">
-        <span
-          v-for="(step, index) in steps"
-          :key="index"
-          :class="{ active: currentStep === index }"
-          @click="changeStep(index)"
-        ></span>
-      </div>
+      <StepIndicator
+        :steps="steps"
+        :currentStep="currentStep"
+        @update:currentStep="(step) => (currentStep = step)"
+      />
       <component :is="steps[currentStep].component" v-bind="stepProps" />
     </div>
 
@@ -22,11 +19,18 @@
 import StepOne from './CreatePost_1.vue'
 import StepTwo from './CreatePost_2.vue'
 import StepThree from './CreatePost_3.vue'
+import StepIndicator from '../components/Selector.vue'
 import { uploadImage } from '../services/imageService.js'
 import { auth, db } from '../services/firebase'
 import { collection, addDoc, doc, getDoc } from 'firebase/firestore'
 
 export default {
+  components: {
+    StepOne,
+    StepTwo,
+    StepThree,
+    StepIndicator,
+  },
   data() {
     return {
       currentStep: 0,
@@ -36,6 +40,7 @@ export default {
       thumbnailFile: null,
       authorName: 'Anónimo',
       loading: false,
+      category: '',
       steps: [
         { name: 'Detalles', component: StepOne },
         { name: 'Imágenes', component: StepTwo },
@@ -64,11 +69,13 @@ export default {
       return {
         title: this.title,
         content: this.content,
+        category: this.category,
         bannerFile: this.bannerFile,
         thumbnailFile: this.thumbnailFile,
         authorName: this.authorName,
         onTitleChange: (value) => (this.title = value),
         onContentChange: (value) => (this.content = value),
+        onCategoryChange: (value) => (this.category = value),
         onBannerChange: (file) => (this.bannerFile = file),
         onThumbnailChange: (file) => (this.thumbnailFile = file),
         onPublish: this.publishPost,
@@ -77,6 +84,16 @@ export default {
   },
   methods: {
     async publishPost() {
+      if (!this.category || !this.title || !this.content) {
+        alert('Por favor, completa la primera sección antes de publicar.')
+        return
+      }
+
+      if (!this.thumbnailFile || !this.bannerFile) {
+        alert('Por favor, completa la segunda sección antes de publicar.')
+        return
+      }
+
       this.loading = true
       try {
         const bannerUrl = this.bannerFile ? await uploadImage(this.bannerFile) : null
@@ -89,17 +106,18 @@ export default {
           bannerUrl,
           thumbnailUrl,
           author: this.authorName,
+          category: this.category,
           userId: auth.currentUser?.uid || null,
           createdAt: new Date(),
         })
 
-        alert('Post creado exitosamente!')
+        alert('¡Entrada creada exitosamente!')
         this.$router.push('/')
       } catch (error) {
-        console.error('Error al publicar el post:', error)
+        console.error('Error al publicar entrada:', error)
         alert('Error al publicar. Intenta nuevamente.')
       } finally {
-        this.loading = false // Ocultar la barra de progreso
+        this.loading = false
       }
     },
     nextStep() {
@@ -112,52 +130,11 @@ export default {
         this.currentStep--
       }
     },
-    changeStep(index) {
-      this.currentStep = index
-    },
-  },
-  components: {
-    StepOne,
-    StepTwo,
-    StepThree,
   },
 }
 </script>
 
 <style scoped>
-.step-indicators {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-.step-indicators span {
-  width: 15px;
-  height: 15px;
-  border: 2px solid gray;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.step-indicators span.active {
-  background-color: white;
-  border-color: black;
-}
-
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
 .loading-spinner {
   width: 50px;
   height: 50px;

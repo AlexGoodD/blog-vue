@@ -1,6 +1,9 @@
 <template>
   <div class="preview">
     <h1>Previsualiza tu blog</h1>
+    <div class="action-section">
+      <button @click="publishPost">Publicar</button>
+    </div>
     <BlogCard
       :post="{
         title,
@@ -8,9 +11,6 @@
         thumbnailUrl,
       }"
     />
-    <div class="action-section">
-      <button @click="publishPost">Publicar</button>
-    </div>
   </div>
 </template>
 
@@ -66,23 +66,5 @@ button {
 
 button:hover {
   background-color: #0056cc;
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #ddd;
-  border-top: 5px solid #007bff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 </style>

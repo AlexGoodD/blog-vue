@@ -2,7 +2,6 @@
   <div class="image-upload">
     <h1>Sube imágenes para usar como banner y miniatura</h1>
     <div class="upload-section">
-      <!--Carga de imágenes banner-->
       <div class="upload-button banner" @click="triggerBannerUpload">
         <span class="material-symbols-outlined icon">upload</span>
         <p>Sube una imagen de por lo menos 1285 x 380 píxeles</p>
@@ -10,7 +9,6 @@
         <p v-if="bannerFileName" class="file-name">{{ bannerFileName }}</p>
       </div>
 
-      <!--Carga de imágenes thumbnail-->
       <div class="upload-button thumbnail" @click="triggerThumbnailUpload">
         <span class="material-symbols-outlined icon">upload</span>
         <p>Sube una imagen de por lo menos 400 x 460 píxeles</p>
