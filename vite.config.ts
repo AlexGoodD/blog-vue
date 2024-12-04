@@ -13,4 +13,14 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      // Redirigir solicitudes API relacionadas con Firestore
+      '/firebase': {
+        target: 'https://firestore.googleapis.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/firebase/, ''), // Reemplaza el prefijo /firebase
+      },
+    },
+  },
 })
