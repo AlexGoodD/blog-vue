@@ -35,6 +35,7 @@ export default {
         console.log(`Iniciando sesión con: ${this.email}`)
         await login(this.email, this.password)
         alert('Inicio de sesión exitoso')
+        this.$router.push('/')
       } catch (error) {
         console.error('Código del error:', error.code)
         console.error('Mensaje del error:', error.message)
@@ -44,3 +45,84 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #141414;
+  color: white;
+  text-align: center;
+}
+
+.login-page h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+form {
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+label {
+  font-size: 14px;
+  text-align: left;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+input:focus {
+  outline: none;
+  border-color: #0066ff;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #0066ff;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056cc;
+}
+
+.register-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #141414;
+  color: white;
+  text-align: center;
+}
+
+.register-page h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.register-page h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+</style>
