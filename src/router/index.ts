@@ -1,23 +1,52 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import HomePage from '../pages/HomePage.vue'
+import BlogDetails from '../pages/BlogDetails.vue'
+import EditBlog from '../pages/EditBlog.vue'
+import CreatePost from '../pages/CreatePost.vue'
+import LoginPage from '../pages/LoginPage.vue'
+import RegisterPage from '../pages/RegisterPage.vue'
+import { auth } from '../services/firebase'
+import { onAuthStateChanged } from 'firebase/auth'
+import ProfilePage from '../pages/Profile.vue'
+
+const routes = [
+  { path: '/', name: 'Home', component: HomePage },
+  { path: '/post/:id', name: 'BlogDetails', component: BlogDetails },
+  { path: '/edit/:id', name: 'EditBlog', component: EditBlog },
+  { path: '/create', name: 'CreatePost', component: CreatePost, meta: { requiresAuth: true } },
+  { path: '/login', name: 'Login', component: LoginPage },
+  { path: '/register', name: 'Register', component: RegisterPage },
+  { path: '/user', name: 'User', component: ProfilePage },
+]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: HomeView,
-    },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
-    },
-  ],
+  history: createWebHistory(),
+  routes,
+})
+
+// Variable para controlar la inicialización del estado de autenticación
+let isAuthChecked = false
+
+// Middleware para proteger rutas
+router.beforeEach((to, from, next) => {
+  if (!isAuthChecked) {
+    onAuthStateChanged(auth, (user) => {
+      isAuthChecked = true // Marcar que ya se verificó el estado de autenticación
+      const isAuthenticated = !!user
+      if (to.meta.requiresAuth && !isAuthenticated) {
+        next({ name: 'Login' })
+      } else {
+        next()
+      }
+    })
+  } else {
+    const isAuthenticated = !!auth.currentUser
+    if (to.meta.requiresAuth && !isAuthenticated) {
+      next({ name: 'Login' })
+    } else {
+      next()
+    }
+  }
 })
 
 export default router
