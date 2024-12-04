@@ -7,6 +7,7 @@ import LoginPage from '../pages/LoginPage.vue'
 import RegisterPage from '../pages/RegisterPage.vue'
 import { auth } from '../services/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
+import ProfilePage from '../pages/Profile.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: HomePage },
@@ -15,6 +16,7 @@ const routes = [
   { path: '/create', name: 'CreatePost', component: CreatePost, meta: { requiresAuth: true } },
   { path: '/login', name: 'Login', component: LoginPage },
   { path: '/register', name: 'Register', component: RegisterPage },
+  { path: '/user', name: 'User', component: ProfilePage },
 ]
 
 const router = createRouter({
