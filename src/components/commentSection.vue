@@ -1,43 +1,109 @@
-<!-- eslint-disable vue/block-lang -->
 <template>
   <div>
-    <h4>Comentarios</h4>
-    <ul>
-      <li v-for="comment in comments" :key="comment.id">
-        <p>
-          <strong>{{ comment.author }}</strong
-          >: {{ comment.text }}
-        </p>
-      </li>
+    <h1>Comentarios</h1>
+    <CommentInput :onCommentSubmit="addComment" />
+    <ul class="comments-list">
+      <CommentItem
+        v-for="comment in comments"
+        :key="comment.id"
+        :comment="comment"
+        @onEdit="editComment"
+        @onDelete="confirmDelete"
+      />
     </ul>
-    <textarea v-model="newComment"></textarea>
-    <button @click="addComment">Agregar</button>
   </div>
 </template>
 
 <script>
+import { db, auth } from '../services/firebase'
+import {
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  orderBy,
+  doc,
+  deleteDoc,
+  updateDoc,
+} from 'firebase/firestore'
+import CommentInput from './CommentInput.vue'
+import CommentItem from './CommentItem.vue'
+
 export default {
-  props: { postId: String },
+  components: { CommentInput, CommentItem },
+  props: {
+    postId: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
-    return { comments: [], newComment: '' }
+    return {
+      comments: [],
+      showDeleteModal: false,
+      deleteCommentId: null,
+    }
   },
   methods: {
     async fetchComments() {
-      const snapshot = await this.$firestore
-        .collection('posts')
-        .doc(this.postId)
-        .collection('comments')
-        .get()
-      this.comments = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+      try {
+        const commentsQuery = query(
+          collection(db, 'blogPost', this.postId, 'comments'),
+          orderBy('createdAt', 'desc'),
+        )
+        const commentsSnapshot = await getDocs(commentsQuery)
+        this.comments = commentsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        console.log('Comentarios cargados:', this.comments)
+      } catch (error) {
+        console.error('Error al cargar comentarios:', error)
+      }
     },
-    async addComment() {
-      await this.$firestore.collection('posts').doc(this.postId).collection('comments').add({
-        text: this.newComment,
-        author: firebase.auth().currentUser.displayName,
-        createdAt: new Date(),
-      })
-      this.newComment = ''
-      this.fetchComments()
+    async addComment(newComment) {
+      try {
+        if (!auth.currentUser) {
+          alert('Debes iniciar sesión para agregar un comentario.')
+          return
+        }
+
+        await addDoc(collection(db, 'blogPost', this.postId, 'comments'), {
+          text: newComment,
+          author: auth.currentUser.email || 'Usuario Anónimo',
+          createdAt: new Date(),
+          userId: auth.currentUser?.uid || null,
+        })
+        this.fetchComments()
+      } catch (error) {
+        console.error('Error al agregar comentario:', error)
+      }
+    },
+    async editComment(commentId, updatedText) {
+      try {
+        const commentRef = doc(db, 'blogPost', this.postId, 'comments', commentId)
+        await updateDoc(commentRef, { text: updatedText })
+        console.log(`Comentario ${commentId} actualizado con texto: ${updatedText}`)
+        this.fetchComments()
+      } catch (error) {
+        console.error('Error al actualizar comentario:', error)
+        alert('Hubo un error al actualizar el comentario.')
+      }
+    },
+    confirmDelete(commentId) {
+      const confirmation = confirm('¿Estás seguro de que deseas eliminar este comentario?')
+      if (!confirmation) return
+      this.deleteComment(commentId)
+    },
+    async deleteComment(commentId) {
+      try {
+        const commentRef = doc(db, 'blogPost', this.postId, 'comments', commentId)
+        await deleteDoc(commentRef)
+        console.log('Comentario eliminado:', commentId)
+        this.fetchComments()
+      } catch (error) {
+        console.error('Error al eliminar comentario:', error)
+      }
     },
   },
   created() {
@@ -45,3 +111,11 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.comments-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>

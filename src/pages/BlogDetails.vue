@@ -1,67 +1,113 @@
 <template>
   <div class="blog-details">
-    <h1>{{ post.title }}</h1>
-    <p><strong>Autor:</strong> {{ post.author }}</p>
     <img :src="post.bannerUrl" alt="Banner del Blog" />
-    <p>{{ post.content }}</p>
+    <hr />
+    <h1>{{ post.title }}</h1>
+    <p class="content">{{ post.content }}</p>
+    <hr />
+    <div class="detalles">
+      <div class="author">
+        <span class="material-symbols-outlined"> person </span>
+        {{ post.author }}
+      </div>
+      <div class="date">
+        <span class="material-symbols-outlined"> calendar_month </span>
+        {{ formattedDate }}
+      </div>
+    </div>
+    <hr />
+    <div v-if="canEdit" class="extra-section">
+      <button @click="editPost">
+        <span class="material-symbols-outlined">edit</span>
+      </button>
 
-    <h3>Comentarios</h3>
-    <ul>
-      <li v-for="comment in comments" :key="comment.id">
-        <strong>{{ comment.author }}:</strong> {{ comment.text }}
-      </li>
-    </ul>
+      <button @click="deletePost">
+        <span class="material-symbols-outlined">delete</span>
+      </button>
+    </div>
 
-    <form @submit.prevent="addComment">
-      <textarea v-model="newComment" placeholder="Escribe un comentario"></textarea>
-      <button type="submit">Agregar Comentario</button>
-    </form>
+    <CommentSection v-if="post.id" :postId="post.id" />
   </div>
 </template>
 
 <script>
-import { db } from '../services/firebase'
+import { db, auth } from '../services/firebase'
+import { doc, getDoc, deleteDoc, collection, getDocs } from 'firebase/firestore'
+import CommentSection from '../components/CommentSection.vue'
 
 export default {
+  components: {
+    CommentSection,
+  },
   data() {
     return {
       post: {},
-      comments: [],
-      newComment: '',
+      canEdit: false,
     }
+  },
+  computed: {
+    formattedDate() {
+      if (this.post.createdAt?.seconds) {
+        const date = new Date(this.post.createdAt.seconds * 1000)
+        return date.toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      }
+      return 'Fecha no disponible'
+    },
   },
   async created() {
     const postId = this.$route.params.id
 
-    // Obtener los detalles del post
-    const postDoc = await db.collection('posts').doc(postId).get()
-    this.post = { id: postDoc.id, ...postDoc.data() }
-
-    // Obtener los comentarios del post
-    const commentsSnapshot = await db.collection('posts').doc(postId).collection('comments').get()
-    this.comments = commentsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
+    try {
+      const postDoc = await getDoc(doc(db, 'blogPost', postId))
+      if (postDoc.exists()) {
+        this.post = { id: postDoc.id, ...postDoc.data() }
+        console.log('Post cargado:', this.post)
+        this.canEdit = auth.currentUser?.uid === this.post.userId
+        this.scrollToTop()
+      } else {
+        alert('El blog no existe.')
+        this.$router.push('/')
+      }
+    } catch (error) {
+      console.error('Error al cargar los detalles del blog:', error)
+    }
   },
   methods: {
-    async addComment() {
-      const postId = this.$route.params.id
-
-      await db.collection('posts').doc(postId).collection('comments').add({
-        text: this.newComment,
-        author: 'Usuario Anónimo', // Aquí podrías usar el nombre del usuario autenticado
-        createdAt: new Date(),
+    scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
       })
+    },
+    editPost() {
+      this.$router.push(`/edit/${this.post.id}`)
+    },
+    async deletePost() {
+      const confirmation = confirm(
+        '¿Estás seguro de que deseas eliminar este post y todos sus comentarios?',
+      )
+      if (!confirmation) return
 
-      // Recargar comentarios
-      const commentsSnapshot = await db.collection('posts').doc(postId).collection('comments').get()
-      this.comments = commentsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
+      try {
+        const postRef = doc(db, 'blogPost', this.post.id)
+        const commentsRef = collection(db, 'blogPost', this.post.id, 'comments')
 
-      this.newComment = ''
+        const commentsSnapshot = await getDocs(commentsRef)
+        const deletePromises = commentsSnapshot.docs.map((commentDoc) => deleteDoc(commentDoc.ref))
+        await Promise.all(deletePromises)
+
+        await deleteDoc(postRef)
+
+        alert('El post y sus comentarios han sido eliminados correctamente.')
+        this.$router.push('/')
+      } catch (error) {
+        console.error('Error al eliminar el post y sus comentarios:', error)
+        alert('Hubo un error al intentar eliminar el post y sus comentarios.')
+      }
     },
   },
 }
@@ -73,9 +119,58 @@ export default {
   margin: auto;
   padding: 20px;
 }
+
 .blog-details img {
-  max-width: 100%;
-  height: auto;
+  width: 100%;
+  height: 400px;
   margin: 20px 0;
+  border-radius: 25px;
+}
+
+.extra-section button {
+  background-color: transparent;
+  color: #a3a3a3;
+  border: none;
+  cursor: pointer;
+}
+
+.detalles {
+  color: #a3a3a3;
+}
+
+.detalles strong {
+  color: white;
+}
+
+.content {
+  color: #a3a3a3;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 200%;
+}
+
+hr {
+  color: #343434;
+  width: 100%;
+}
+
+.extra-section {
+  display: flex;
+}
+
+.date {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: #a3a3a3;
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: #a3a3a3;
 }
 </style>
