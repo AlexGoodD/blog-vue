@@ -94,7 +94,6 @@ h1 {
   align-items: center;
 }
 
-/* Botón general */
 .upload-button {
   background-color: #353535;
   color: #a3a3a3;

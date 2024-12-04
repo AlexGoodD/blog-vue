@@ -1,6 +1,6 @@
 <template>
   <div class="preview">
-    <h1>Previsualiza tu blog</h1>
+    <h1>Previsualiza tu post</h1>
     <div class="action-section">
       <button @click="publishPost">Publicar</button>
     </div>
@@ -9,6 +9,8 @@
         title,
         author: authorName || 'Anónimo',
         thumbnailUrl,
+        content,
+        createdAt: { seconds: Math.floor(Date.now() / 1000) },
       }"
     />
   </div>
@@ -19,10 +21,10 @@ import BlogCard from '../components/BlogCard.vue'
 
 export default {
   components: { BlogCard },
-  props: ['title', 'authorName', 'thumbnailFile', 'onPublish'],
+  props: ['title', 'authorName', 'thumbnailFile', 'onPublish', 'content'],
   computed: {
     thumbnailUrl() {
-      return this.thumbnailFile ? URL.createObjectURL(this.thumbnailFile) : 'default-thumbnail.jpg'
+      return this.thumbnailFile ? URL.createObjectURL(this.thumbnailFile) : '/default-thumbnail.jpg'
     },
   },
   methods: {
@@ -43,8 +45,12 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-right: 50px;
-  padding-left: 50px;
+  justify-content: center;
+  padding: 0;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .action-section {
@@ -55,10 +61,10 @@ export default {
 button {
   background-color: #007bff;
   color: white;
-  padding: 10px 20px;
+  padding: 0.8rem 1.5rem;
   border: none;
-  border-radius: 25px;
-  font-size: 16px;
+  border-radius: 1.5rem;
+  font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -66,5 +72,18 @@ button {
 
 button:hover {
   background-color: #0056cc;
+}
+
+.BlogCard {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Responsivo */
+@media (max-width: 800px) {
+  .preview {
+    padding: 0 5%;
+    text-align: center;
+  }
 }
 </style>
