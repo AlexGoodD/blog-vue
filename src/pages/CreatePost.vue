@@ -20,7 +20,7 @@ import StepOne from './CreatePost_1.vue'
 import StepTwo from './CreatePost_2.vue'
 import StepThree from './CreatePost_3.vue'
 import StepIndicator from '../components/Selector.vue'
-import { uploadImage } from '../services/imageService.js'
+import { uploadImage } from '../services/imageService.ts'
 import { auth, db } from '../services/firebase'
 import { collection, addDoc, doc, getDoc } from 'firebase/firestore'
 
