@@ -95,6 +95,7 @@ export default {
       }
 
       this.loading = true
+
       try {
         const bannerUrl = this.bannerFile ? await uploadImage(this.bannerFile) : null
         const thumbnailUrl = this.thumbnailFile ? await uploadImage(this.thumbnailFile) : null

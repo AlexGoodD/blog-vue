@@ -141,6 +141,7 @@ export default {
     width: 60%;
     top: 10%;
     right: 0;
+    z-index: 999;
   }
 
   .nav-links.open {

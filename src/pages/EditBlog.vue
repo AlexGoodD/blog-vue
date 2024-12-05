@@ -20,7 +20,7 @@
       <p><strong>Fecha de creación:</strong> {{ formattedDate }}</p>
     </div>
 
-    <button @click="updatePost" class="update-btn">Guardar Cambios</button>
+    <button @click="updatePost" class="update-btn">Guardar cambios</button>
   </div>
 </template>
 

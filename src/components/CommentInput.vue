@@ -11,6 +11,7 @@
 
 <script>
 export default {
+  name: 'CommentInput',
   props: {
     onCommentSubmit: {
       type: Function,
