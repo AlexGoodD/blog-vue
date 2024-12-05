@@ -12,11 +12,11 @@ import ProfilePage from '../pages/Profile.vue'
 const routes = [
   { path: '/', name: 'Home', component: HomePage },
   { path: '/post/:id', name: 'BlogDetails', component: BlogDetails },
-  { path: '/edit/:id', name: 'EditBlog', component: EditBlog },
+  { path: '/edit/:id', name: 'EditBlog', component: EditBlog, meta: { requiresAuth: true } },
   { path: '/create', name: 'CreatePost', component: CreatePost, meta: { requiresAuth: true } },
   { path: '/login', name: 'Login', component: LoginPage },
   { path: '/register', name: 'Register', component: RegisterPage },
-  { path: '/user', name: 'User', component: ProfilePage },
+  { path: '/user', name: 'User', component: ProfilePage, meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({
