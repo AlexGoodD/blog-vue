@@ -71,14 +71,12 @@
       </button>
     </div>
     <div class="content-display">
-      <!-- Posts -->
       <template v-if="currentTab === 'posts'">
         <div class="blog-card-container">
           <BlogCard v-for="post in userPosts" :key="post.id" :post="post" />
         </div>
       </template>
 
-      <!-- Comentarios -->
       <template v-if="currentTab === 'comments'">
         <div class="comments-container">
           <router-link
@@ -97,9 +95,6 @@
             </div>
             <div class="comment-footer">
               <small class="comment-date">{{ formattedDate(comment.createdAt) }}</small>
-              <p class="post-link">
-                En post: <span class="post-title">{{ comment.postTitle }}</span>
-              </p>
             </div>
           </router-link>
         </div>
@@ -111,13 +106,17 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { auth, db } from '../services/firebase'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, query, where, collection, getDocs } from 'firebase/firestore'
 import { updateName, changePassword } from '../services/authService'
 import { logout as logoutService } from '../services/authService'
 import { useRouter } from 'vue-router'
+import BlogCard from '../components/BlogCard.vue'
 
 export default {
   name: 'UserPage',
+  components: {
+    BlogCard,
+  },
   setup() {
     const userName = ref('')
     const firstName = ref('')
@@ -151,8 +150,54 @@ export default {
       }
     }
 
+    const fetchUserPosts = async () => {
+      const user = auth.currentUser
+      if (user) {
+        const postsQuery = query(collection(db, 'blogPost'), where('userId', '==', user.uid))
+        const querySnapshot = await getDocs(postsQuery)
+        userPosts.value = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+      }
+    }
+
+    const fetchUserComments = async () => {
+      const user = auth.currentUser
+      if (user) {
+        try {
+          const postsSnapshot = await getDocs(collection(db, 'blogPost'))
+          const comments = []
+
+          for (const postDoc of postsSnapshot.docs) {
+            const commentsQuery = query(
+              collection(db, 'blogPost', postDoc.id, 'comments'),
+              where('userId', '==', user.uid),
+            )
+            const commentsSnapshot = await getDocs(commentsQuery)
+
+            commentsSnapshot.forEach((commentDoc) => {
+              comments.push({
+                id: commentDoc.id,
+                postId: postDoc.id, // Asegúrate de incluir postId
+                postTitle: postDoc.data().title,
+                createdAt: commentDoc.data().createdAt,
+                ...commentDoc.data(),
+              })
+            })
+          }
+
+          userComments.value = comments
+        } catch (error) {
+          console.error('Error al cargar los comentarios:', error)
+        }
+      } else {
+        console.error('El usuario no está autenticado.')
+      }
+    }
+
     const handleUpdateInfo = async () => {
-      if (!newEmail.value || !firstName.value.trim() || !lastName.value.trim()) {
+      if (!firstName.value.trim() || !lastName.value.trim()) {
         alert('Por favor, completa todos los campos correctamente.')
         return
       }
@@ -165,6 +210,18 @@ export default {
       } catch (error) {
         alert(error.message)
       }
+    }
+
+    const formattedDate = (createdAt) => {
+      if (createdAt?.seconds) {
+        const date = new Date(createdAt.seconds * 1000)
+        return date.toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      }
+      return 'Fecha desconocida'
     }
 
     const handleChangePassword = async () => {
@@ -203,7 +260,11 @@ export default {
 
     const router = useRouter()
 
-    onMounted(fetchUserData)
+    onMounted(() => {
+      fetchUserData()
+      fetchUserPosts()
+      fetchUserComments()
+    })
 
     return {
       userName,
@@ -223,6 +284,7 @@ export default {
       logout,
       firstName,
       lastName,
+      formattedDate,
     }
   },
 }
