@@ -9,13 +9,13 @@
       </div>
       <div class="social-media">
         <a href="https://www.facebook.com" target="_blank" rel="noopener" class="social-icon">
-          <span class="material-symbols-outlined">facebook</span>
+          <i class="fab fa-facebook"></i>
         </a>
         <a href="https://www.twitter.com" target="_blank" rel="noopener" class="social-icon">
-          <span class="material-symbols-outlined">twitter</span>
+          <i class="fab fa-twitter"></i>
         </a>
         <a href="https://www.instagram.com" target="_blank" rel="noopener" class="social-icon">
-          <span class="material-symbols-outlined">instagram</span>
+          <i class="fab fa-instagram"></i>
         </a>
       </div>
       <p>© 2024 Uanlog.com. Todos los derechos reservados.</p>

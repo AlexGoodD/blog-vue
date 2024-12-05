@@ -76,7 +76,7 @@ export default {
   justify-content: center;
   position: relative;
   width: 100%;
-  max-width: 1200px;
+  max-width: 80%;
   margin: 20px auto;
   overflow: hidden;
   border-radius: 25px;

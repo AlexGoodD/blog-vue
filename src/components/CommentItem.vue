@@ -33,6 +33,7 @@
 import { auth } from '../services/firebase'
 
 export default {
+  name: 'CommentItem',
   props: {
     comment: {
       type: Object,

@@ -30,6 +30,7 @@ import CommentInput from './CommentInput.vue'
 import CommentItem from './CommentItem.vue'
 
 export default {
+  name: 'CommentSection',
   components: { CommentInput, CommentItem },
   props: {
     postId: {

@@ -21,6 +21,7 @@
 
 <script>
 export default {
+  name: 'BlogCard',
   props: { post: Object },
   computed: {
     formattedDate() {

@@ -5,8 +5,8 @@ import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
-// https://vite.dev/config/
 export default defineConfig({
+  base: '/',
   plugins: [vue(), vueJsx(), vueDevTools()],
   resolve: {
     alias: {
@@ -15,12 +15,17 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // Redirigir solicitudes API relacionadas con Firestore
       '/firebase': {
         target: 'https://firestore.googleapis.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/firebase/, ''), // Reemplaza el prefijo /firebase
+        rewrite: (path) => path.replace(/^\/firebase/, ''),
       },
+    },
+  },
+  build: {
+    outDir: 'dist', // Carpeta de salida para el build
+    rollupOptions: {
+      input: './index.html', // Indica el archivo de entrada principal
     },
   },
 })

@@ -1,8 +1,8 @@
 <template>
   <div class="login-page">
-    <h1>Iniciar Sesión</h1>
+    <h1>Iniciar sesión</h1>
     <form @submit.prevent="loginUser">
-      <label for="email">Correo Electrónico</label>
+      <label for="email">Correo electrónico</label>
       <input id="email" v-model="email" type="email" placeholder="Ingresa tu correo" required />
 
       <label for="password">Contraseña</label>
@@ -58,7 +58,7 @@ export default {
 }
 
 .login-page h1 {
-  font-size: 24px;
+  font-size: 2.3rem;
   margin-bottom: 20px;
 }
 
@@ -73,15 +73,18 @@ form {
 label {
   font-size: 14px;
   text-align: left;
+  font-weight: bold;
 }
 
 input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 25px;
+  border: none;
+  border-radius: 1rem;
   font-size: 14px;
   box-sizing: border-box;
+  background-color: #353535;
+  color: white;
 }
 
 input:focus {
