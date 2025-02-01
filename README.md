@@ -3,7 +3,7 @@
 UanLog es una plataforma de blogs donde los usuarios pueden crear, editar y comentar publicaciones. La aplicación está construida con Vue.js y Firebase, proporcionando una experiencia de usuario fluida y en tiempo real.
 
 ## Enlace
-https://uanlog.vercel.app
+https://uanlog.vercel.app (Actualmente desactivado)
 
 ## Características
 
